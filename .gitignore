@@ -1,0 +1,4 @@
+*.sqlite
+.idea/
+node_modules/
+.log

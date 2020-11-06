@@ -1,0 +1,20 @@
+{
+  "production": {
+    "dialect": "postgres",
+    "protocol": "postgres",
+    "database": "",
+    "username": "",
+    "password": "",
+    "host": "",
+    "port": "",
+    "dialectOptions" : {
+      "ssl": true
+    },
+    "logging": false
+  },
+  "development": {
+    "dialect": "sqlite",
+    "storage": "./database.sqlite",
+    "logging": false
+  }
+}

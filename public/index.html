@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+    <title>Caspar - Stock Management Demo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="msapplication-tap-highlight" content="no">
+    <title>Index</title>
+    <link rel="stylesheet"
+          href="https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0-rc1/angular-material.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="lib/angular.js"></script>
+    <script src="lib/angular-materialize.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/indexController.js"></script>
+
+    <!-- jQuery Library -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+
+    <link href="css/materialize.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <link href="css/style.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <!-- Custome CSS-->
+    <link href="css/custom/custom.css" type="text/css" rel="stylesheet" media="screen,projection">
+    <style>
+        .cucuk {
+            display: inline-table;
+        }
+    </style>
+
+</head>
+<body ng-controller="indexController">
+    <header>
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" class="brand-logo"><i class="material-icons" style="font-size: 2em">store</i>Caspar - Stock
+                    Management Demo</a>
+            </div>
+        </nav>
+
+        <div class="container row">
+
+        <ul class="collapsible popout">
+            <li>
+                <div class="collapsible-header active">A simple app to track sales and cashflow for limited number of
+                    items
+                </div>
+                <div class="collapsible-body"><span>I developed this app for a specific need in time. We published a book and distributed its sales
+                        operation. This app helped us to know how many books still we have, and how much money we earned
+                        from sales, and who are keeping books and making sales.</span></div>
+            </li>
+        </ul>
+        </div>
+    </header>
+    <main>
+
+        <div class="row">
+            <div class="col s12">
+                <ul class="tabs">
+                    <li class="tab col s6"><a href="#cashboxes">Cashboxes</a></li>
+                    <li class="tab col s6"><a href="#sellerssales">Sellers & Sales</a></li>
+                </ul>
+            </div>
+            <div id="cashboxes" class="row container">
+
+                <div class="col s12 m12 l6">
+                    <h5>Total Sales: {{totalSales}} ₺</h5>
+                    <table class="striped">
+                        <tbody>
+                        <tr ng-repeat="cashBox in cashBoxes">
+                            <td>{{cashBox.name}}</td>
+                            <td>{{cashBox.amount}} ₺</td>
+                            <td>
+                                <a ng-show="cashBox.amount!=0" ng-click="transferMoney(cashBox)" title="Money Transfer"
+                                   class="waves-effect waves-light btn modal-trigger  teal cucuk">
+                                    <i class="material-icons">swap_vert</i>
+                                </a>
+                            </td>
+                            <td>
+                                <form ng-show="cashBox.move && cashBox == selectedCashBox">
+                                    <select style="display: block" name="moveto" ng-model="transfer.toCashBox">
+                                        <option value="" disabled selected>Select CashBox</option>
+                                        <option ng-repeat="toCashBox in cashBoxes | filter:{id: '!'+selectedCashBox.id}"
+                                                value="{{toCashBox.id}}">{{toCashBox.name}}
+                                        </option>
+                                    </select>
+                                </form>
+                            </td>
+
+                            <td style="width: 20%">
+                                <form ng-show="(cashBox.move) && cashBox == selectedCashBox">
+                                    <input placeholder="Sum" ng-change="checkIfTransfer(transfer.amount)"
+                                           ng-model="transfer.amount"
+                                           name="amount"
+                                           type="text">
+                                    <div ng-if="valMessage" style="color:maroon" role="alert">
+                                        <div ng-message>There is not enough amount in the cashbox.</div>
+                                    </div>
+                                </form>
+                            </td>
+
+                            <td>
+                                <a ng-style="disableIf" ng-show="(cashBox.move) && cashBox == selectedCashBox"
+                                   ng-click="saveTransfer()"
+                                   class="waves-effect waves-light btn modal-trigger  teal cucuk">
+                                    <i class="material-icons">save</i>
+                                </a>
+                                <a ng-show="(cashBox.move) && cashBox == selectedCashBox" ng-click="cancelTransfer()"
+                                   class="waves-effect waves-light btn modal-trigger maroon  cucuk">
+                                    <i class="material-icons">cancel</i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div id="sellerssales" class="row container">
+                <div class="col s12 m12 l6">
+
+                        <h5>Sellers</h5>
+                        <table class="striped">
+                            <thead>
+                            <tr>
+                                <th>Seller Name</th>
+                                <th>Total Stock</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-repeat="seller in sellers">
+                                <td>{{seller.name}}</td>
+                                <td>{{seller.stock}}</td>
+                                <td>
+                                    <a ng-show="seller.stock!=0 && !seller.new" ng-click="moveFrom(seller)" title="Move"
+                                       class="waves-effect waves-light btn modal-trigger  teal cucuk">
+                                        <i class="material-icons">local_shipping</i>
+                                    </a>
+                                    <a ng-show="seller.stock!=0 && !seller.move" ng-click="newFrom(seller)"
+                                       title="New Seller"
+                                       class="waves-effect waves-light btn modal-trigger  teal cucuk">
+                                        <i class="material-icons">loupe</i>
+                                    </a>
+                                    <a ng-show="seller.stock!=0 && !seller.move && !seller.new"
+                                       ng-click="sellFrom(seller)"
+                                       title="Sell"
+                                       class="waves-effect waves-light btn modal-trigger  teal cucuk">
+                                        <i class="material-icons">monetization_on</i>
+                                    </a>
+                                    <a ng-show="seller.stock==0 && !seller.move && !seller.new && !seller.sell"
+                                       ng-click="deleteFrom(seller)" title="Delete"
+                                       class="waves-effect waves-light btn modal-trigger  teal cucuk">
+                                        <i class="material-icons">delete_forever</i>
+                                    </a>
+                                </td>
+                                <td style="width: 35%">
+                                    <form ng-show="seller.move && seller == selectedSeller">
+                                        <select style="display: block" name="moveto" ng-model="obj.toSeller">
+                                            <option value="" disabled selected>Select Seller</option>
+                                            <option ng-repeat="toSeller in sellers | filter:{id: '!'+selectedSeller.id}"
+                                                    value="{{toSeller.id}}">{{toSeller.name}}
+                                            </option>
+                                        </select>
+                                    </form>
+                                    <form ng-show="seller.new && seller == selectedSeller">
+                                        <input placeholder="New Seller Name" ng-model="obj.name" name="newName"
+                                               type="text">
+                                        <input placeholder="District" ng-model="obj.district" type="text">
+                                        <input placeholder="Email" ng-model="obj.email" type="text">
+
+                                    </form>
+                                </td>
+
+                                <td style="width: 20%">
+                                    <form ng-show="(seller.move || seller.new) && seller == selectedSeller">
+                                        <input placeholder="Number Of Copies" ng-change="checkIf(obj.moving)"
+                                               ng-model="obj.moving"
+                                               name="numberOfCopies"
+                                               type="text">
+                                        <div ng-if="valMessage" style="color:maroon" role="alert">
+                                            <div ng-message>There is not that many items in stock.</div>
+                                        </div>
+                                    </form>
+                                </td>
+
+                                <td>
+                                    <a ng-style="disableIf"
+                                       ng-show="(seller.move|| seller.new) && seller == selectedSeller"
+                                       ng-click="save()"
+                                       class="waves-effect waves-light btn modal-trigger  teal cucuk">
+                                        <i class="material-icons">save</i>
+                                    </a>
+                                    <a ng-show="(seller.move|| seller.new) && seller == selectedSeller"
+                                       ng-click="cancel()"
+                                       class="waves-effect waves-light btn modal-trigger maroon  cucuk">
+                                        <i class="material-icons">cancel</i>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+
+                        </table>
+
+                </div>
+                <div class="col s12 m12 l6">
+
+
+
+                        <h5>Sales Transactions</h5>
+
+                        <table class="striped">
+                            <thead>
+                            <tr>
+                                <th>Seller</th>
+                                <th>Location</th>
+                                <th>Number Of Copies</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                                <th>Details</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr ng-show="selectedSeller.sell">
+                                <td style="width: 15%;">
+                                    <select style="display: block" name="moveto" ng-model="transaction.seller_id"
+                                            ng-change="changeSelected(transaction.seller_id)">
+                                        <option ng-repeat="seller in sellers" value="{{seller.id}}">{{seller.name}}
+                                        </option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <form>
+                                        <input ng-model="transaction.location" type="text">
+                                    </form>
+                                </td>
+                                <td>
+                                    <form>
+                                        <input ng-change="checkIf(transaction.numberOfCopies)"
+                                               ng-model="transaction.numberOfCopies"
+                                               type="text">
+                                        <div ng-if="valMessage" style="color:maroon" role="alert">
+                                            <div ng-message>There is not that many items in stock.</div>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form>
+                                        <input ng-model="transaction.price" type="text">
+                                    </form>
+                                </td>
+                                <td>
+                                    {{transaction.numberOfCopies * transaction.price}}
+                                </td>
+                                <td>
+                                    <form>
+                                        <input ng-model="transaction.comment" type="text">
+                                    </form>
+                                </td>
+
+
+                                <td>
+                                    <a ng-style="disableIf" ng-click="transact()"
+                                       class="waves-effect waves-light btn modal-trigger  teal cucuk">
+                                        <i class="material-icons">save</i>
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr ng-repeat="sale in sales">
+                                <td class="bottom">
+                                    <small style="font-size: 0.5em; color: dimgrey">{{sale.created_at || '--' | date:
+                                        'mediumDate'
+                                        }}
+                                    </small>
+                                    </br>
+                                    {{sale.Seller ? sale.Seller.name : "--Silindi--"}}
+                                </td>
+                                <td class="bottom">{{sale.location}}</td>
+                                <td class="bottom">
+                                    {{sale.numberOfCopies}}
+                                </td>
+                                <td class="bottom">
+                                    {{sale.price}}
+                                </td>
+                                <td class="bottom">
+                                    {{sale.numberOfCopies * sale.price}}
+                                </td>
+                                <td class="bottom">
+                                    {{sale.comment}}
+                                </td>
+                                <td class="bottom">
+                                    <a ng-show="sale.Seller" ng-click="undoSale(sale)" title="Satışı Geri Al"
+                                       class="waves-effect waves-light btn modal-trigger  teal cucuk">
+                                        <i class="material-icons">history</i>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+
+                        </table>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="page-footer">
+        <ul>
+            <li><a class="grey-text text-lighten-3" href="http://github.com/iremkucukali/caspar-stock-management">Source
+                Code</a></li>
+        </ul>
+        <p>by iremkucukali</p>
+    </footer>
+</body>
+</html>

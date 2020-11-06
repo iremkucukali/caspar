@@ -1,0 +1,24 @@
+input[type=text] {
+    margin-bottom: 0px;
+}
+
+.bottom{
+    vertical-align: bottom;
+}
+
+td{
+    vertical-align: baseline;
+}
+
+nav, .page-footer {
+    background-color: teal;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+main {
+    flex: 1 0 auto;
+}
